@@ -53,8 +53,8 @@ main = do
 
         runWithNumsAndTimes :: Int -> Int -> IO ()
         runWithNumsAndTimes nums times = do
-            let wqu = newWeightedQuickUnion nums
-            _ <- operateOnForever wqu helper
+            let perc = newPercolation nums
+            _ <- operateOnForever perc helper
             exitWith ExitSuccess
 
         operateOnForever :: Monad m => t -> (t -> m t) -> m b
@@ -62,15 +62,19 @@ main = do
             returnValue <- function value
             operateOnForever returnValue function
 
-        helper :: WeightedQuickUnion -> IO (WeightedQuickUnion)
-        helper wqu = do
-                print wqu
+        helper :: Percolation -> IO (Percolation)
+        helper perc = do
+                print perc
                 (p, q) <- readTwoInts
-                --words line
-                let connected = isConnected wqu p q
-                putStrLn $ "Is connected? " ++ show connected
-                return $ union wqu p q
-                --return array
+                let pointA = toXY p q
+                newPerc <- if isOpen perc pointA
+                                   then putStrLn "Already open!" >> return perc
+                                   else return $ open perc pointA
+                if isFull newPerc pointA
+                    then putStrLn "Filled with water!!"
+                    else putStrLn "No water yet..."
+                when (doesPercolate perc) (putStrLn "Percolates!!!!!!")
+                return newPerc
 
         readTwoInts :: IO (Int, Int)
         readTwoInts = do
@@ -81,24 +85,4 @@ main = do
                     `ap` (maybe (parsingFailure strA) return $ readMaybe strA)
                     `ap` (maybe (parsingFailure strB) return $ readMaybe strB)
                 _ -> die $ "Couldn't parse two integers from line: " ++ line
-
-
-
---    * Reads in a sequence of pairs of integers (between 0 and N-1) from standard input,
---    * where each integer represents some object;
---    * if the objects are in different components, merge the two components
---    * and print the pair to standard output.
---    */
---public static void main(String[] args) {
---    int N = StdIn.readInt();
---    WeightedQuickUnionUF uf = new WeightedQuickUnionUF(N);
---    while (!StdIn.isEmpty()) {
---        int p = StdIn.readInt();
---        int q = StdIn.readInt();
---        if (uf.connected(p, q)) continue;
---        uf.union(p, q);
---        StdOut.println(p + " " + q);
---    }
---    StdOut.println(uf.count() + " components");
---}
 
