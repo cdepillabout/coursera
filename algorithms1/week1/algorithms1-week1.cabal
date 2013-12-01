@@ -20,6 +20,6 @@ executable algorithms1-week1
   main-is:             Main.hs
   other-modules:       Percolation, PercolationStats, WeightedQuickUnion
   -- other-extensions:    
-  build-depends:       base, array
+  build-depends:       base, array, transformers
   -- hs-source-dirs:      
   default-language:    Haskell2010
