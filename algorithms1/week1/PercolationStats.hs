@@ -4,15 +4,10 @@ module PercolationStats ( runPercolationStats
                         )
                         where
 
-import Control.Monad.Trans.Class
+import Control.Monad (forM)
+import System.Random (randomRIO)
 
 import Percolation
-
-data PercolationInfo = PercolationInfo
-                 { percolation :: Percolation
-                 , sideLength :: Int
-                 , times :: Int
-                 } deriving (Show)
 
 data PercolationStats = PercolationStats
                  { percStatsMean :: Double
@@ -24,8 +19,8 @@ data PercolationStats = PercolationStats
                  } deriving (Show)
 
 
-mean :: undefiend
-mean = undefined
+mean :: [Int] -> Int -> Double
+mean results len = (fromIntegral $ sum results) / fromIntegral len
 
 stddev :: undefiend
 stddev = undefined
@@ -37,39 +32,51 @@ confidenceHi :: undefiend
 confidenceHi = undefined
 
 openRandom :: Percolation -> IO Percolation
-openRandom perc = undefined
+openRandom perc = do
+        let sideLen = percolationSideLength perc
+        randomA <- randomRIO (1, sideLen)
+        randomB <- randomRIO (1, sideLen)
+        let xy = toXY randomA randomB
+        if isOpen perc xy
+            then openRandom perc
+            else do
+                --putStrLn $ "Opening " ++ show xy
+                return $ open perc xy
 
 findWhenPercolates :: Int -> IO Int
-findWhenPercolates sideLength = do
-        let perc = newPercolation sideLength
+findWhenPercolates sideLen = do
+        let perc = newPercolation sideLen
         allOpens <- openUntilPercolates perc
         return $ length allOpens
   where
-    tryPercs :: (Bool, Percolation) -> IO (Bool, Percolation)
-    tryPercs (doesPerc, perc)
-        | doesPerc == True = error "This should also never percolate!!!"
-        | otherwise = do
+    openUntilPercolatesHelper :: Percolation -> IO [Bool]
+    openUntilPercolatesHelper perc = do
             newPerc <- openRandom perc
-            return (doesPercolate newPerc, newPerc)
+            if doesPercolate newPerc == True
+                then return [True]
+                else do
+                    l <- openUntilPercolatesHelper newPerc
+                    return $ False : l
 
-    openUntilPercolatesHelper :: (Bool, Percolation) -> [IO (Bool, Percolation)]
-    openUntilPercolatesHelper (doesPerc, perc) = do
-            (newDoesPerc, newPerc) <- (lift $ tryPercs (doesPerc, perc)) :: [IO (Bool, Percolation)]
-            if newDoesPerc == True
-                then [return (True, newPerc)]
-                else return (False, newPerc) : openUntilPercolatesHelper (False, newPerc)
-
-    openUntilPercolates :: Percolation -> IO [(Bool, Percolation)]
+    openUntilPercolates :: Percolation -> IO [Bool]
     openUntilPercolates perc
         | doesPercolate perc = error "It should not percolate from the very beginning!"
-        | otherwise = sequence $ openUntilPercolatesHelper (False, perc)
+        | otherwise = openUntilPercolatesHelper perc
 
 runPercolationStats :: Int -> Int -> IO PercolationStats
-runPercolationStats n t = do undefined
-
---        PercolationStats
- --                       (mean)
-  --                      (stddev)
-   --                     (confidenceLo)
-    --                    (confidenceHi)
+runPercolationStats n t = do
+        resultLengths <- forM (replicate t n) findWhenPercolates
+        let myMean = mean resultLengths t / fromIntegral (n * n)
+            varianceList = map (\len -> (fromIntegral len) - myMean) resultLengths
+            variance = sum (map (^2) varianceList) / fromIntegral t
+            stdDev = sqrt variance
+            confidenceLow = myMean - (1.96) * stdDev
+            confidenceHigh = myMean + (1.96) * stdDev
+        return $ PercolationStats myMean stdDev confidenceLow confidenceHigh n t
+                        --(mean resultLengths t)
+                        --(stddev resultLengths)
+                        --(confidenceLo resultLengths)
+                        --(confidenceHi resultLengths)
+                        --n
+                        --t
 

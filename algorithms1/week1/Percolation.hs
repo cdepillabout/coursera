@@ -1,5 +1,5 @@
 
-module Percolation ( Percolation
+module Percolation ( Percolation(..)
                    , X(..)
                    , Y(..)
                    , toXY
