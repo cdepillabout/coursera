@@ -7,5 +7,5 @@ import PercolationStats
 import WeightedQuickUnion
 
 what :: IO ()
-what = print "hello"
+what = print "hello from what"
 

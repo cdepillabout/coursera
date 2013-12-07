@@ -6,5 +6,9 @@ import Percolation
 import PercolationStats
 import WeightedQuickUnion
 
+import MyQuickCheck
+
 main :: IO ()
-main = print "hello"
+main = do
+          print "hello"
+          what
