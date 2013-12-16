@@ -5,6 +5,7 @@ module WeightedQuickUnion ( union
                           , countWqu
                           , newWeightedQuickUnion
                           , WeightedQuickUnion
+                          , Index
                           )
                           where
 
