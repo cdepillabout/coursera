@@ -26,7 +26,7 @@ build: install-deps
 	@echo -e "----------------"
 	@cabal build
 
-build-tests: install-deps
+build-tests: install-deps configure
 	@echo -e "\nBuilding Tests"
 	@echo -e "--------------"
 	@cabal build alltests
@@ -40,7 +40,12 @@ test: build-tests
 	@echo -e "\nRunning project tests"
 	@echo -e "---------------------"
 	#@bash -c "time ./dist/build/alltests/alltests --num-threads 4 +RTS -N4 -RTS --quickcheck-tests 10000"
-	@bash -c "time ./dist/build/alltests/alltests --threads 4 --maximum-generated-tests 10000 --hide-successes"
+	#@bash -c "cd dist && time ./build/alltests/alltests --threads 4 --maximum-generated-tests 10000 --hide-successes"
+	#-@cabal test --test-options='--color --threads 4 --maximum-generated-tests 10000 --hide-successes'
+	-@time cabal test --test-options='--color --threads 4 --maximum-generated-tests 10000'
+	@echo -e "\nTest Log"
+	@echo -e "--------"
+	@cat "dist/test/algorithms1-week1-0.1.0.0-alltests.log"
 
 
 show-test-log: dist/test/algorithms1-week1-0.1.0.0-alltests.log
@@ -50,5 +55,5 @@ show-test-log: dist/test/algorithms1-week1-0.1.0.0-alltests.log
 
 clean: 
 	@echo -e "\nCleaning"
-	@echo -e "\n------"
+	@echo -e "--------"
 	-rm -rf ./dist

@@ -22,7 +22,7 @@ import qualified Test.Framework.Providers.QuickCheck2 as FrameworkQC2
 --  [ testProperty "sort == sort . reverse" $
 --      \list -> sort (list :: [Int]) == sort (reverse list) ]
 
-test_list = [1..100]
+test_list = [1..50]
 
 instance Arbitrary WeightedQuickUnion where
         arbitrary = do
@@ -33,8 +33,8 @@ instance Arbitrary (WeightedQuickUnion, Index, Index) where
         arbitrary = do
             n <- elements test_list
             let wqu = newWeightedQuickUnion n
-            --indexA <- elements [1..n]
-            indexA <- elements [1..100]
+            indexA <- elements [1..n]
+            --indexA <- elements [1..100]
             indexB <- elements [1..n]
             return (wqu, indexA, indexB)
 
@@ -48,9 +48,9 @@ findShowsCorrectUnionAfterBeingUnioned wqu intA intB =
                      in isConnected wquAfterUnion intA intB
                 else True
 
-findShowsCorrectUnionAfterBeingUnionedBad :: (WeightedQuickUnion, Index, Index) -> Property
+findShowsCorrectUnionAfterBeingUnionedBad :: (WeightedQuickUnion, Index, Index) -> Bool
 findShowsCorrectUnionAfterBeingUnionedBad (wqu, indexA, indexB) =
-        (indexA /= indexB) ==>
+        --(indexA /= indexB) ==>
         let wquAfterUnion = union wqu indexA indexB
         in isConnected wquAfterUnion indexA indexB
 
