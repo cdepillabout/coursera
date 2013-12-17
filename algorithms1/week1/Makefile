@@ -9,8 +9,6 @@ all: default
 	@echo -e "----------------------"
 	@cabal sandbox init
 
-dist/test/algorithms1-week1-0.1.0.0-alltests.log: test
-
 configure: .cabal-sandbox
 	@echo -e "\nRunning Cabal Configure"
 	@echo -e "-----------------------"
@@ -21,7 +19,7 @@ install-deps: .cabal-sandbox
 	@echo -e "-------------------------------"
 	@cabal install --only-dependencies --enable-tests -j8
 
-build: install-deps
+build: install-deps configure
 	@echo -e "\nBuilding Project"
 	@echo -e "----------------"
 	@cabal build
@@ -34,24 +32,20 @@ build-tests: install-deps configure
 run: build
 	@echo -e "\nRunning Project"
 	@echo -e "---------------"
-	@bash -c "time ./dist/build/algorithms1-week1/algorithms1-week1 100 50"
+	@bash -c "time cabal run -- 100 50"
 
 test: build-tests
 	@echo -e "\nRunning project tests"
 	@echo -e "---------------------"
-	#@bash -c "time ./dist/build/alltests/alltests --num-threads 4 +RTS -N4 -RTS --quickcheck-tests 10000"
-	#@bash -c "cd dist && time ./build/alltests/alltests --threads 4 --maximum-generated-tests 10000 --hide-successes"
-	#-@cabal test --test-options='--color --threads 4 --maximum-generated-tests 10000 --hide-successes'
-	-@time cabal test --test-options='--color --threads 4 --maximum-generated-tests 10000'
+	-@bash -c "time cabal test --test-options='--color --threads 4 --maximum-generated-tests 10000'"
 	@echo -e "\nTest Log"
 	@echo -e "--------"
-	@cat "dist/test/algorithms1-week1-0.1.0.0-alltests.log"
+	-@bash -c "cat dist/test/*[^0123456789].log"
 
-
-show-test-log: dist/test/algorithms1-week1-0.1.0.0-alltests.log
+show-test-log:
 	@echo -e "\nLatest Test Log"
 	@echo -e "---------------"
-	@cat "dist/test/algorithms1-week1-0.1.0.0-alltests.log"
+	-@bash -c "cat dist/test/*[^0123456789].log"
 
 clean: 
 	@echo -e "\nCleaning"
