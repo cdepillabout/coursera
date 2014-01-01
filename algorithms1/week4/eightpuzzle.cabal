@@ -1,0 +1,49 @@
+Name:                   eightpuzzle
+Version:                0.1.0.0
+Author:                 (cdep)illabout <cdep.illabout@gmail.com>
+Maintainer:             (cdep)illabout <cdep.illabout@gmail.com>
+-- Homepage:               
+License:                GPL-3
+License-File:           LICENSE
+-- Synopsis:               
+-- Description:            
+-- Category:               
+Cabal-Version:          >= 1.10
+-- Extra-Source-Files:     
+Build-Type:             Simple
+
+Library
+  Default-Language:     Haskell2010
+  HS-Source-Dirs:       src
+  GHC-Options:          -Wall -threaded -O2
+  Exposed-Modules:      EightPuzzle
+  Other-Modules:        EightPuzzle.Internal
+  Build-Depends:        base
+
+Executable eightpuzzle
+  Main-Is:             Main.hs
+  -- Other-Modules:       
+  -- Other-Extensions:    
+  Build-Depends:       base
+                     , eightpuzzle
+  Hs-Source-Dirs:      src
+  Default-Language:    Haskell2010
+  Ghc-Options:         -Wall -threaded -O2 -rtsopts -fprof-auto
+
+Test-Suite eightpuzzle-tests
+  Type:                 exitcode-stdio-1.0
+  Default-Language:     Haskell2010
+  Hs-Source-Dirs:       test
+  Ghc-Options:          -Wall -threaded -rtsopts -with-rtsopts=-N
+  Main-Is:              TestMain.hs
+  Build-Depends:        base
+                      , eightpuzzle
+                      , QuickCheck
+                      , HUnit
+                      , test-framework
+                      , test-framework-hunit
+                      , test-framework-quickcheck2
+
+Source-Repository head
+  Type:                 git
+--  Location:             

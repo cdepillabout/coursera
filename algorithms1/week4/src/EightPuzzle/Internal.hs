@@ -1,0 +1,3 @@
+module EightPuzzle.Internal
+    (
+    ) where
