@@ -8,6 +8,7 @@ import qualified Test.Framework as Framework
 import qualified Test.Framework.Runners.Console as Framework.Runners.Console
 
 import MyQuickCheck
+import MyHUnit
 
 main :: IO ()
 --main = Tasty.defaultMain tastytests
@@ -17,4 +18,7 @@ tastytests :: Tasty.TestTree
 tastytests = Tasty.testGroup "Tests" [tastyproperties]
 
 frameworktests :: Framework.Test
-frameworktests = Framework.testGroup "Tests" frameworkproperties
+frameworktests = Framework.testGroup "Tests"
+        [ Framework.testGroup "QuickCheck" frameworkproperties
+        , Framework.testGroup "HUnit" frameworkUnitTests
+        ]
