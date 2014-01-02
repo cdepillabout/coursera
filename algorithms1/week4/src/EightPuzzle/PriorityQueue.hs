@@ -11,7 +11,7 @@ module EightPuzzle.PriorityQueue
     , size
     ) where
 
-import Control.Monad (guard, MonadPlus, mzero, when)
+import Control.Monad (guard, MonadPlus, mzero, when, liftM2)
 import Control.Monad.ST (ST, unsafeSTToIO, unsafeIOToST)
 import Control.Monad.Trans.Class (lift)
 import Data.STRef
@@ -109,16 +109,16 @@ delMin pqRef@(PQ ref) = do
                 count <- readSTRef countRef
 
                 -- exchange the first and last elements
-                pq' <- exchange pq 0 (count - 1)
+                exchange pq 0 (count - 1)
                 -- write bottom to the previous last element
                 Vector.write vec (count - 1) undefined
                 -- update the count
                 writeSTRef countRef (count -  1)
                 -- sink the new top element to where it should be
-                pq'' <- sink pq' 0 (count - 1)
+                pq' <- sink pq 0 (count - 1)
 
                 -- possible resize the priority queue
-                checkSize pq''
+                checkSize pq'
 
                 return minFromQueue
 
@@ -192,38 +192,29 @@ swim pq idx
             --debug ("in swim, idx: " ++ show idx ++ ", parentIdx: " ++ show parentIdx)
             case isGreater of
                 True -> do
-                    pq' <- exchange pq idx parentIdx
-                    swim pq' parentIdx
+                    exchange pq idx parentIdx
+                    swim pq parentIdx
                 False -> return pq
 
 sink :: (Ord k, Show k) => PriorityQueue_ s k -> Int -> Int -> ST s (PriorityQueue_ s k)
-sink pq idx count
+sink !pq !idx !count
         | (2 * (idx+1)) - 1 >= count = return pq
         | otherwise = do
-            let j = 2 * idx
+            let !j = 2 * idx
             --debug ("in sink, idx: " ++ show idx ++ ", j: " ++ show j ++ ", count: " ++ show count)
-            isGreater <- greater pq j (j+1)
-            let j' = if j < count && isGreater then (j+1) else j
-            isGreater' <- greater pq idx j'
+            !isGreater <- greater pq j (j+1)
+            let !j' = if j < count && isGreater then (j+1) else j
+            !isGreater' <- greater pq idx j'
             if not isGreater'
                 then return pq
                 else do
-                    pq' <- exchange pq idx j'
-                    sink pq' j' count
-{-
-    while (2*k <= N) {
-        int j = 2*k;
-        if (j < N && greater(j, j+1)) j++;
-        if (!greater(k, j)) break;
-        exch(k, j);
-        k = j;
-    }
--}
+                    exchange pq idx j'
+                    sink pq j' count
 
 
-exchange :: (Show k) => PriorityQueue_ s k -> Int -> Int -> ST s (PriorityQueue_ s k)
-exchange pq@(PriorityQueue vec _ _) idxA idxB = do
-        Vector.swap vec idxA idxB
+exchange :: (Show k) => PriorityQueue_ s k -> Int -> Int -> ST s ()
+exchange (PriorityQueue !vec _ _) !idxA !idxB = do
+        Vector.unsafeSwap vec idxA idxB
 
         --itemA <- Vector.read vec idxA
         --itemB <- Vector.read vec idxB
@@ -231,10 +222,11 @@ exchange pq@(PriorityQueue vec _ _) idxA idxB = do
         --debug ("in exch, exching itemA (" ++ show itemA ++ ") with idxB(" ++ show itemB ++ ")")
         --Vector.write vec idxA itemB
         --Vector.write vec idxB itemA
-        return pq
+        --return pq
 
 greater :: (Ord k) => PriorityQueue_ s k -> Int -> Int -> ST s (Bool)
-greater (PriorityQueue vec _ _) idxA idxB = do
-        itemA <- Vector.read vec idxA
-        itemB <- Vector.read vec idxB
-        return $ itemA > itemB
+greater (PriorityQueue !vec _ _) !idxA !idxB = do
+        --itemA <- Vector.read vec idxA
+        --itemB <- Vector.read vec idxB
+        --return $ itemA > itemB
+        liftM2 (>) (Vector.read vec idxA) (Vector.read vec idxB)
