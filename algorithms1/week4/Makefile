@@ -39,6 +39,7 @@ run: build
 	@bash -c "time cabal run -- 100 50"
 
 tests test: build-tests
+	-@rm -f eightpuzzle.tix
 	@echo -e "\nRunning project tests"
 	@echo -e "---------------------"
 	-@bash -c "time cabal test --test-options='--color --threads 4 --maximum-generated-tests 10000'"
@@ -47,6 +48,7 @@ tests test: build-tests
 	-@bash -c "cat dist/test/*[^0123456789].log"
 
 profile profiling: build dist/profiling
+	-@rm -f eightpuzzle.tix
 	@echo -e "\nProfiling Project"
 	@echo -e "-----------------"
 	@cabal run -- +RTS -i0.02 -P -h -s -RTS 100
@@ -64,6 +66,11 @@ show-coverage:
 	@echo -e "\nLatest Coverage"
 	@echo -e "---------------"
 	-@bash -c "firefox -no-remote dist/hpc/html/*/hpc_index.html"
+
+show-profiling:
+	@echo -e "\nLatest Profiling"
+	@echo -e "---------------"
+	-@bash -c "evince dist/profiling/eightpuzzle.ps"
 
 clean: 
 	@echo -e "\nCleaning"
