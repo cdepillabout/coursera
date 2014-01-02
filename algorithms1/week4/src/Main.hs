@@ -29,6 +29,12 @@ run = do
         lift $ insert pq 2
         logSTOp "after insert 2, size" $ size pq
         logSTOp "after insert 2, min" $ minOfPQ pq
+        lift $ insert pq 1
+        logSTOp "after insert 1, size" $ size pq
+        logSTOp "after insert 1, min" $ minOfPQ pq
+        lift $ insert pq 5
+        logSTOp "after insert 5, size" $ size pq
+        logSTOp "after insert 5, min" $ minOfPQ pq
         return ()
   where
       --logSTOp :: (Monad m, Show a) => String -> ST s a -> WriterT [String] (ST s) ()

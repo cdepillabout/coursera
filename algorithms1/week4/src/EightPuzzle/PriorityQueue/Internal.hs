@@ -1,11 +1,9 @@
 
 module EightPuzzle.PriorityQueue.Internal
-    ( sink
-    , swim
+    ( swim
     ) where
 
 
-sink = undefined
 
 swim = undefined
 
