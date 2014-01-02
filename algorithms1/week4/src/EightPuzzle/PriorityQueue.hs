@@ -77,7 +77,7 @@ size (PQ ref) = do
 minOfPQ :: PriorityQueue s k -> ST s (Maybe k)
 minOfPQ pqRef = safeReadVec pqRef 0
 
-insert :: forall s k. PriorityQueue s k -> k -> ST s ()
+insert :: forall s k. (Ord k, Show k) => PriorityQueue s k -> k -> ST s ()
 insert (PQ ref) item = do
         pq <- readSTRef ref
         debugPrintPQMsg_ "in insert, before inserting and checkResize, " pq
@@ -88,11 +88,13 @@ insert (PQ ref) item = do
   where
     insert' :: PriorityQueue_ s k -> ST s (PriorityQueue_ s k)
     insert' pq@(PriorityQueue vec _ countRef) = do
-        --when (vecSize == count) (resize pq (vecSize * 2))
         count <- readSTRef countRef
         Vector.write vec count item
         modifySTRef countRef (1+)
-        return $ pq
+        debugPrintPQMsg_ "in insert', before swimming" pq
+        pq' <- swim pq count
+        debugPrintPQMsg_ "in insert', after swimming" pq'
+        return pq'
 
 delMin = undefined
 
@@ -149,4 +151,31 @@ resize (PriorityQueue vec vecSize countRef) newSize = do
                 go (idx+1)
 
 
-swim = undefined
+swim :: (Ord k, Show k) => PriorityQueue_ s k -> Int -> ST s (PriorityQueue_ s k)
+swim pq idx
+        | idx < 1 = return pq
+        | otherwise = do
+            let parentIdx = ((idx + 1) `div` 2) - 1
+            isGreater <- greater pq parentIdx idx
+            debug ("in swim, idx: " ++ show idx ++ ", parentIdx: " ++ show parentIdx)
+            case isGreater of
+                True -> do
+                    pq' <- exchange pq idx parentIdx
+                    swim pq' parentIdx
+                False -> return pq
+
+exchange :: (Show k) => PriorityQueue_ s k -> Int -> Int -> ST s (PriorityQueue_ s k)
+exchange pq@(PriorityQueue vec _ _) idxA idxB = do
+        itemA <- Vector.read vec idxA
+        itemB <- Vector.read vec idxB
+        debug ("in exch, exching idxA (" ++ show idxA ++ ") with idxB(" ++ show idxB ++ ")")
+        debug ("in exch, exching itemA (" ++ show itemA ++ ") with idxB(" ++ show itemB ++ ")")
+        Vector.write vec idxA itemB
+        Vector.write vec idxB itemA
+        return pq
+
+greater :: (Ord k) => PriorityQueue_ s k -> Int -> Int -> ST s (Bool)
+greater (PriorityQueue vec _ _) idxA idxB = do
+        itemA <- Vector.read vec idxA
+        itemB <- Vector.read vec idxB
+        return $ itemA > itemB

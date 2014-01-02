@@ -33,6 +33,7 @@ build-tests: install-deps configure
 	@cabal build eightpuzzle-tests
 
 run: build
+	-@rm -f eightpuzzle.tix
 	@echo -e "\nRunning Project"
 	@echo -e "---------------"
 	@bash -c "time cabal run -- 100 50"
