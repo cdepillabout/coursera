@@ -32,6 +32,9 @@ data PriorityQueue_ s k = PriorityQueue
     , itemCount :: STRef s Int
     }
 
+instance (Show k) => Show (PriorityQueue_ s k) where
+        show (PriorityQueue vec vecSize count) = undefined
+
 ---------------
 -- DEBUGGING --
 ---------------
@@ -115,10 +118,10 @@ delMin pqRef@(PQ ref) = do
                 -- update the count
                 writeSTRef countRef (count -  1)
                 -- sink the new top element to where it should be
-                pq' <- sink pq 0 (count - 1)
+                sink pq 0 (count - 1)
 
                 -- possible resize the priority queue
-                checkSize pq'
+                checkSize pq
 
                 return minFromQueue
 
@@ -128,13 +131,15 @@ newRef :: PriorityQueue_ s k -> ST s (PriorityQueue s k)
 newRef pq = fmap PQ $ newSTRef pq
 
 guardM :: (Monad m, MonadPlus n) => m (Bool) -> m (n a) -> m (n a)
-guardM wrappedBool elseM = do
-        unwrappedBool <- wrappedBool
+guardM !wrappedBool !elseM = do
+        !unwrappedBool <- wrappedBool
         if unwrappedBool then return mzero else elseM
+{-# INLINE guardM #-}
 
 safeReadVec :: PriorityQueue s k -> Int -> ST s (Maybe k)
-safeReadVec pqRef idx = do
+safeReadVec !pqRef !idx = do
         guardM (isEmpty pqRef) $ fmap Just $ unsafeReadVec pqRef idx
+{-# INLINE safeReadVec #-}
 
 unsafeReadVec :: PriorityQueue s k -> Int -> ST s k
 unsafeReadVec (PQ ref) idx = do
@@ -196,25 +201,24 @@ swim pq idx
                     swim pq parentIdx
                 False -> return pq
 
-sink :: (Ord k, Show k) => PriorityQueue_ s k -> Int -> Int -> ST s (PriorityQueue_ s k)
+sink :: (Ord k, Show k) => PriorityQueue_ s k -> Int -> Int -> ST s ()
 sink !pq !idx !count
-        | (2 * (idx+1)) - 1 >= count = return pq
+        | (2 * (idx+1)) - 1 >= count = return ()
         | otherwise = do
             let !j = 2 * idx
             --debug ("in sink, idx: " ++ show idx ++ ", j: " ++ show j ++ ", count: " ++ show count)
             !isGreater <- greater pq j (j+1)
             let !j' = if j < count && isGreater then (j+1) else j
             !isGreater' <- greater pq idx j'
-            if not isGreater'
-                then return pq
-                else do
-                    exchange pq idx j'
-                    sink pq j' count
+            when isGreater' $ do
+                exchange pq idx j'
+                sink pq j' count
 
 
 exchange :: (Show k) => PriorityQueue_ s k -> Int -> Int -> ST s ()
-exchange (PriorityQueue !vec _ _) !idxA !idxB = do
+exchange !(PriorityQueue !vec _ _) !idxA !idxB = do
         Vector.unsafeSwap vec idxA idxB
+{-# INLINE exchange #-}
 
         --itemA <- Vector.read vec idxA
         --itemB <- Vector.read vec idxB

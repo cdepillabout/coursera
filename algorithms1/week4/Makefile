@@ -51,7 +51,7 @@ profile profiling: build dist/profiling
 	-@rm -f eightpuzzle.tix
 	@echo -e "\nProfiling Project"
 	@echo -e "-----------------"
-	@cabal run -- +RTS -i0.02 -P -h -s -RTS 100
+	@cabal run -- +RTS -i0.02 -P -hbdrag,void -hc -s -RTS 100
 	@mv eightpuzzle.prof eightpuzzle.hp dist/profiling/
 	@echo
 	@cat dist/profiling/eightpuzzle.prof

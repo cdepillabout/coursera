@@ -13,15 +13,15 @@ import Control.Monad (forM_)
 
 main :: IO ()
 main = do
-        let result = runST $ execWriterT $ run1
+        let result = runST $ execWriterT $ run2
         mapM_ putStrLn result
 
 run2 :: WriterT [String] (ST s) ()
 run2 = do
         pq <- lift $ newPQ
-        forM_ [1..75000] $ \num -> do
+        forM_ [1..130000] $ \num -> do
             lift $ insert pq num
-        forM_ [1..75000] $ \_ -> do
+        forM_ [1..130000] $ \_ -> do
             lift $ delMin pq
 
 run1 :: WriterT [String] (ST s) ()
