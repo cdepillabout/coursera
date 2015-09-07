@@ -20,26 +20,29 @@ grad = zeros(size(theta));
 %
 
 h = X * theta;
-inner = h - y;
-first = (1 / (2 * m)) * (inner' * inner);
+hMinusY = h - y;
+first = (1 / (2 * m)) * (hMinusY' * hMinusY);
 
 nonFirstTheta = theta(2:end, :);
 second = (lambda / (2 * m)) * (nonFirstTheta' * nonFirstTheta);
 
 J = first + second;
 
+thetaFirstRow = theta(1,:);
 
+thetaWithoutFirstRow = theta;
+thetaWithoutFirstRow(1,:) = [];
 
+XWithoutFirstColumn = X;
+XWithoutFirstColumn(:,1) = [];
 
+gradNoRegularization = (1/m) * (X' * hMinusY);
+gradRegularization = (lambda / m) * thetaWithoutFirstRow;
 
-
-
-
-
-
+grad = gradNoRegularization  + [0 ; gradRegularization];
 
 % =========================================================================
 
-grad = grad(:);
+%grad = grad(:);
 
 end
