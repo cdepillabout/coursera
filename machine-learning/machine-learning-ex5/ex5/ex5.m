@@ -52,8 +52,6 @@ J = linearRegCostFunction([ones(m, 1) X], y, theta, 1);
 fprintf(['Cost at theta = [1 ; 1]: %f '...
          '\n(this value should be about 303.993192)\n'], J);
 
-fprintf('Program paused. Press enter to continue.\n');
-
 %% =========== Part 3: Regularized Linear Regression Gradient =============
 %  You should now implement the gradient for regularized linear 
 %  regression.
@@ -65,9 +63,6 @@ theta = [1 ; 1];
 fprintf(['Gradient at theta = [1 ; 1]:  [%f; %f] '...
          '\n(this value should be about [-15.303016; 598.250744])\n'], ...
          grad(1), grad(2));
-
-fprintf('Program paused. Press enter to continue.\n');
-
 
 %% =========== Part 4: Train Linear Regression =============
 %  Once you have implemented the cost and gradient correctly, the
@@ -89,9 +84,6 @@ ylabel('Water flowing out of the dam (y)');
 hold on;
 plot(X, [ones(m, 1) X]*theta, '--', 'LineWidth', 2)
 hold off;
-
-fprintf('Program paused. Press enter to continue.\n');
-
 
 %% =========== Part 5: Learning Curve for Linear Regression =============
 %  Next, you should implement the learningCurve function. 
@@ -117,9 +109,6 @@ fprintf('# Training Examples\tTrain Error\tCross Validation Error\n');
 for i = 1:m
     fprintf('  \t%d\t\t%f\t%f\n', i, error_train(i), error_val(i));
 end
-
-fprintf('Program paused. Press enter to continue.\n');
-pause;
 
 %% =========== Part 6: Feature Mapping for Polynomial Regression =============
 %  One solution to this is to use polynomial regression. You should now
@@ -148,11 +137,6 @@ X_poly_val = [ones(size(X_poly_val, 1), 1), X_poly_val];           % Add Ones
 fprintf('Normalized Training Example 1:\n');
 fprintf('  %f  \n', X_poly(1, :));
 
-fprintf('\nProgram paused. Press enter to continue.\n');
-pause;
-
-
-
 %% =========== Part 7: Learning Curve for Polynomial Regression =============
 %  Now, you will get to experiment with polynomial regression with multiple
 %  values of lambda. The code below runs polynomial regression with 
@@ -160,7 +144,7 @@ pause;
 %  lambda to see how the fit and learning curve change.
 %
 
-lambda = 0;
+lambda = 1;
 [theta] = trainLinearReg(X_poly, y, lambda);
 
 % Plot training data and fit
